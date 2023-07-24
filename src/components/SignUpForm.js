@@ -15,8 +15,8 @@ function SignUpForm() {
 
     const userData = {
       email: email,
-      full_name: fullName,
-      phone_number: phoneNumber,
+      name: fullName,
+      phone: phoneNumber,
       password: password,
       password_confirmation: passwordConfirmation,
     };

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import AdminNavbar from './AdminNavbar'
+
 
 const API_BOARDGAMES_URL = "http://localhost:4000/boardgames";
 
@@ -80,6 +82,7 @@ function ManageGames() {
 
   return (
     <div>
+      <AdminNavbar/>
       <h1>Manage Boardgames</h1>
       <form onSubmit={handleSubmit}>
         <div>
