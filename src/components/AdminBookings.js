@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminNavbar from './AdminNavbar';
+import Container from 'react-bootstrap/esm/Container';
+import Row from 'react-bootstrap/esm/Row';
+import Col from 'react-bootstrap/esm/Col';
+import Form from 'react-bootstrap/esm/Form';
+import Button from 'react-bootstrap/esm/Button';
+import Card from 'react-bootstrap/Card';
+import Modal from 'react-bootstrap/Modal';
 
 const API_BOOKINGS_URL = "http://localhost:4000/bookings";
 const API_BOARDGAMES_URL = "http://localhost:4000/boardgames";
@@ -12,6 +19,8 @@ function AdminBookings() {
   const [boardgames, setBoardgames] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [showAllBookings, setShowAllBookings] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
 
   useEffect(() => {
     // Fetch bookings data
@@ -49,7 +58,10 @@ function AdminBookings() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   const getBoardgameDescription = (boardgameId) => {
@@ -73,16 +85,26 @@ function AdminBookings() {
   };
 
   const handleDeleteBooking = (bookingId) => {
-    // Perform the delete request to remove the booking from the database
     axios.delete(`${API_BOOKINGS_URL}/${bookingId}`)
       .then((response) => {
-        // If successful, update the state to remove the deleted booking
         setBookings((prevBookings) => prevBookings.filter((booking) => booking.id !== bookingId));
       })
       .catch((error) => {
         console.error(error);
         // Handle error if needed
       });
+
+    closeDeleteModal();
+  };
+
+  const openDeleteModal = (bookingId) => {
+    setSelectedBookingId(bookingId);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setSelectedBookingId(null);
+    setShowDeleteModal(false);
   };
 
   // Filter bookings based on the selected date or show all bookings
@@ -93,23 +115,29 @@ function AdminBookings() {
     : bookings;
 
   return (
-    <div>
-      <AdminNavbar />
-      <h1>Admin Bookings</h1>
-      <div>
-        {/* Date input to filter bookings */}
-        <label>Select Date:</label>
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={(e) => {
-            setSelectedDate(e.target.value);
-            setShowAllBookings(false);
-          }}
-        />
-        {/* Show All Bookings button */}
-        <span> or </span><button onClick={() => setShowAllBookings(true)}>SHOW ALL BOOKINGS</button>
-      </div>
+    <>
+    <AdminNavbar />
+    <Container>
+      <h3>Bookings Manager</h3><br/>
+      <h5>Select a date below:</h5>
+        <Row className='mb-5'>
+          <Col>
+            <Form>
+              <Form.Control
+                type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  setShowAllBookings(false);
+                } }
+              />
+            </Form>
+          </Col>
+          <Col>
+            or <Button size='md' onClick={() => setShowAllBookings(true)}> Show ALL Bookings</Button>
+          </Col>
+          </Row>
+          <Row>
       {filteredBookings.map((booking) => {
         const boardgameDescription = getBoardgameDescription(booking.boardgameId);
         const boardgameTitle = getBoardgameTitle(booking.boardgameId);
@@ -117,22 +145,51 @@ function AdminBookings() {
         const tableMaxGuests = getTableMaxGuests(booking.tableId);
 
         return (
-          <div key={booking.id}>
-            <h2>Booking #{booking.id}</h2>
-            <h3>User ID: {booking.userId}</h3>
-            <p>Table: {booking.tableId} / Maximum {tableMaxGuests} guests</p>
-            <p>Boardgame: {boardgameTitle} <br /> {boardgameDescription} <br /> Max Players: {boardgameMaxPlayers}</p>
-            <p>Date: {formatDate(booking.bookingDate)}</p>
-            <p>
-              Start: {formatTime(booking.bookingStart)}
-              <br />
-              End: {formatTime(booking.bookingFinish)}
-            </p>
-            <button onClick={() => handleDeleteBooking(booking.id)}>CANCEL THIS BOOKING</button>
-          </div>
+          <>
+          <Col md={6}>
+          <Card className='mb-4' key={booking.id}>
+            <Card.Header>Booking #{booking.id}</Card.Header>
+            <Card.Body >
+              <Card.Title>Customer: {booking.name}</Card.Title>
+              <Card.Text>
+                Phone: {booking.phone}<br/>
+                User ID: #{booking.userId}<br/>
+                Table: {booking.tableId} / Maximum {tableMaxGuests} guests
+              </Card.Text>
+              <Card.Title>Date: {formatDate(booking.bookingDate)}</Card.Title>
+              <Card.Text>
+                Start: {formatTime(booking.bookingStart)} <br />
+                End: {formatTime(booking.bookingFinish)} <br /><br />
+                <Card.Subtitle>Boardgame: {boardgameTitle} </Card.Subtitle>
+                <span style={{fontSize:'14px',color:'grey'}}>Description: {boardgameDescription} <br />
+                Max Players: {boardgameMaxPlayers}</span>
+              </Card.Text>
+              <Button variant="danger" size="sm" onClick={() => openDeleteModal(booking.id)}>Cancel this Booking</Button>
+            </Card.Body>
+          </Card>
+          </Col>
+          </>
         );
       })}
-    </div>
+      </Row>
+        <Modal show={showDeleteModal} onHide={closeDeleteModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Delete Booking</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Are you sure you want to delete this booking?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={closeDeleteModal}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={() => handleDeleteBooking(selectedBookingId)}>
+              Delete
+            </Button>
+          </Modal.Footer>
+        </Modal>
+    </Container>
+    </>
   );
 }
 

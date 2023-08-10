@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form'
+import Container from 'react-bootstrap/esm/Container';
+import FloatingLabel from 'react-bootstrap/esm/FloatingLabel';
+import Row from 'react-bootstrap/esm/Row'
+import Col from 'react-bootstrap/esm/Col'
 
 function SignUpForm() {
   const [email, setEmail] = useState('');
@@ -14,11 +20,13 @@ function SignUpForm() {
     e.preventDefault();
 
     const userData = {
-      email: email,
-      name: fullName,
-      phone: phoneNumber,
-      password: password,
-      password_confirmation: passwordConfirmation,
+      "user": {
+        email: email,
+        password: password,
+        password_confirmation: passwordConfirmation,
+        name: fullName,
+        phone: phoneNumber
+      }
     };
 
     try {
@@ -26,6 +34,8 @@ function SignUpForm() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Connection': 'keep-alive',
         },
         body: JSON.stringify(userData),
       });
@@ -47,58 +57,92 @@ function SignUpForm() {
   };
 
   return (
-    <div>
-      <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Full Name:</label>
-          <input
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Phone Number:</label>
-          <input
-            type="text"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Confirm Password:</label>
-          <input
-            type="password"
-            value={passwordConfirmation}
-            onChange={(e) => setPasswordConfirmation(e.target.value)}
-          />
-        </div>
-        <button type="submit">Sign Up</button>
-      </form>
-      {message && (
-        <p className={success ? 'success-message' : 'error-message'}>{message}</p>
-      )}
-      <p>
-        Already have an account? <Link to="/login">Login</Link>
+    <><>
+      <Container>
+        <Row className='d-flex align-items-center justify-content-center'>
+          <Col md={10} lg={8} xl={6}>
+            <div className='loginbg'>
+              <div className="logo-img mt-2 mb-5 d-flex justify-content-center">
+                <img src="./tablequest-blue.png" alt="TableQuest logo"></img>
+              </div>
+              <div className="mb-3 d-flex justify-content-center">
+                <h5>Create your account:</h5>
+              </div>
+              <Form onSubmit={handleSubmit}>
+                <FloatingLabel
+                  label="Email address"
+                  className='mb-3'
+                >
+                  <Form.Control
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder='name@email.com'
+                    style={{height:70}} />
+                </FloatingLabel>
+                <FloatingLabel
+                  label="Full Name"
+                  className='mb-3'
+                >
+                  <Form.Control
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder='Name & Surname'
+                    style={{height:70}} />
+                </FloatingLabel>
+                <FloatingLabel
+                  label="Phone Number"
+                  className='mb-3'
+                >
+                  <Form.Control
+                    type="text"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder='XXX-XXXX-XXX'
+                    style={{height:70}} />
+                </FloatingLabel>
+                <FloatingLabel
+                  label="Password"
+                  className='mb-3'
+                >
+                  <Form.Control
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    style={{height:70}} />
+                </FloatingLabel>
+                <FloatingLabel
+                  label="Confirm Password"
+                  className='mb-3'
+                >
+                  <Form.Control
+                    type="password"
+                    value={passwordConfirmation}
+                    onChange={(e) => setPasswordConfirmation(e.target.value)}
+                    style={{height:70}} />
+                </FloatingLabel>
+                <div className="d-grid gap-2">
+                  <Button variant='success' type="submit" size="lg" className='mt-3 mb-4' style={{fontWeight:600 , fontSize:24 , padding:15 }}>Create Account</Button>
+                </div>    
+                <div className="d-flex align-items-center justify-content-center">
+                  {message && (
+                    <p className={success ? 'success-message' : 'error-message'}>{message}</p>
+                  )}
+                </div>
+              </Form>
+            </div>
+          </Col>
+        </Row>
+      </Container>
+      
+    </>
+    <div className="mt-5 d-flex align-items-center justify-content-center">
+      <p style={{fontWeight:500 , fontSize:20 , textAlign:'center'}}>
+        Already have an account?<br/><Link to="/login">Click here to Login</Link>
       </p>
     </div>
+    </>
   );
 }
 

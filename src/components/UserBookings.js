@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Navbar from './Navbar';
+// import Navbar from './Navbar';
+import NavbarUser from './NavbarUser';
+import Container from 'react-bootstrap/esm/Container';
+import Card from 'react-bootstrap/Card'
+import Row from 'react-bootstrap/esm/Row';
+import Col from 'react-bootstrap/esm/Col';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 
 const API_BOOKINGS_URL = "http://localhost:4000/bookings";
 const API_BOARDGAMES_URL = "http://localhost:4000/boardgames";
@@ -10,6 +17,10 @@ function UserBookings() {
   const [bookings, setBookings] = useState([]);
   const [tables, setTables] = useState([]);
   const [boardgames, setBoardgames] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [cancellationResult, setCancellationResult] = useState(null);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
+  
 
   useEffect(() => {
     // Fetch bookings data
@@ -37,6 +48,33 @@ function UserBookings() {
       });
   }, []);
 
+  const handleCancelBooking = (bookingId) => {
+    axios.delete(`${API_BOOKINGS_URL}/${bookingId}`)
+      .then(() => {
+        setCancellationResult({ success: true });
+        setSelectedBookingId(bookingId); // Set the selected booking ID for Modal display
+        // Fetch updated bookings data
+        axios.get(API_BOOKINGS_URL)
+          .then((response) => setBookings(response.data))
+          .catch((error) => {
+            console.error(error);
+            // Handle error if needed
+          });
+      })
+      .catch((error) => {
+        setCancellationResult({ success: false });
+        setSelectedBookingId(bookingId); // Set the selected booking ID for Modal display
+        console.error(error);
+        // Handle error if needed
+      });
+  
+    openModal(); // Open the modal after initiating the cancellation
+  };  
+
+  const openModal = () => setShowModal(true);
+  const closeModal = () => setShowModal(false);
+
+
   const formatTime = (timeString) => {
     const date = new Date(timeString);
     const hours = date.getHours();
@@ -54,17 +92,17 @@ function UserBookings() {
 
   const getBoardgameDescription = (boardgameId) => {
     const boardgameDesc = boardgames.find((game) => game.id === boardgameId);
-    return boardgameDesc ? boardgameDesc.description : '';
+    return boardgameDesc ? boardgameDesc.description : 'N/A';
   };
 
   const getBoardgameTitle = (boardgameId) => {
     const boardgameTitle = boardgames.find((game) => game.id === boardgameId);
-    return boardgameTitle ? boardgameTitle.title : '';
+    return boardgameTitle ? boardgameTitle.title : 'None selected';
   };
 
   const getBoardgameMaxPlayers = (boardgameId) => {
     const boardgameMaxPlayers = boardgames.find((game) => game.id === boardgameId);
-    return boardgameMaxPlayers ? boardgameMaxPlayers.maxPlayers : '';
+    return boardgameMaxPlayers ? boardgameMaxPlayers.maxPlayers : 'N/A';
   };
 
   const getTableMaxGuests = (tableId) => {
@@ -82,9 +120,11 @@ function UserBookings() {
   const sortedBookings = [...userBookings].sort((a, b) => new Date(b.bookingDate) - new Date(a.bookingDate));
 
   return (
-    <div>
-      <Navbar />
-      <h1>Your bookings</h1>
+      <>
+      {/* <Navbar /> */}
+      <NavbarUser/>
+      <Container>
+      <div className='mb-5'><h3>Your bookings</h3></div>
       {sortedBookings.map((booking) => {
         const boardgameDescription = getBoardgameDescription(booking.boardgameId);
         const boardgameTitle = getBoardgameTitle(booking.boardgameId);
@@ -92,27 +132,61 @@ function UserBookings() {
         const tableMaxGuests = getTableMaxGuests(booking.tableId);
 
         return (
-          <div key={booking.id}>
-            <h2>Booking #{booking.id}</h2>
-            <h3>User ID: {booking.userId}</h3>
-            <p>Table: {booking.tableId} / Maximum {tableMaxGuests} guests</p>
-            <p>
-              Boardgame: {boardgameTitle}
-              <br />
-              {boardgameDescription}
-              <br />
-              Max Players: {boardgameMaxPlayers}
-            </p>
-            <p>Date: {formatDate(booking.bookingDate)}</p>
-            <p>
-              Start: {formatTime(booking.bookingStart)}
-              <br />
-              End: {formatTime(booking.bookingFinish)}
-            </p>
-          </div>
+          <>
+          <Row>
+            <Col lg={8} xl={6}>
+              <Card className='mb-4'>
+                <Card.Header>Booking #{booking.id}</Card.Header>
+                <Card.Body key={booking.id}>
+                  <Card.Title>Date: {formatDate(booking.bookingDate)}</Card.Title>
+                  <Card.Text>
+                    Start: {formatTime(booking.bookingStart)} <br />
+                    End: {formatTime(booking.bookingFinish)} <br /><br />
+                    Table: {booking.tableId} / Maximum {tableMaxGuests} guests <br /><br />
+                    <Card.Subtitle>Boardgame: {boardgameTitle} </Card.Subtitle>
+                    <span style={{fontSize:'14px',color:'grey'}}>Description: {boardgameDescription} <br />
+                    Max Players: {boardgameMaxPlayers}</span>
+                  </Card.Text>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedBookingId(booking.id);
+                      handleCancelBooking(booking.id);
+                    }}
+                    className="mt-3"
+                  >
+                    Cancel this Booking
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+          
+          </>
         );
       })}
-    </div>
+        <Modal show={showModal} onHide={closeModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {cancellationResult && cancellationResult.success
+                ? 'Booking Successfully Cancelled'
+                : 'Error Cancelling Booking'}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {cancellationResult && cancellationResult.success
+              ? 'Your booking has been successfully cancelled.'
+              : 'An error occurred while cancelling the booking.'}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={closeModal}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+    </Container>
+    </>
   );
 }
 

@@ -1,5 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
 
 function AdminNavbar() {
   const navigate = useNavigate();
@@ -21,6 +24,8 @@ function AdminNavbar() {
         // Clear the stored tokens and navigate to the login page
         sessionStorage.removeItem('authToken');
         sessionStorage.removeItem('userId');
+        sessionStorage.removeItem('userName');
+        sessionStorage.removeItem('userPhone');
         sessionStorage.setItem('isLoggedIn', 'false');
         navigate('/login'); // Navigate to the login page
       } else {
@@ -33,22 +38,20 @@ function AdminNavbar() {
   };
 
   return (
-    <nav>
-      <ul>
-        <li>
-          <Link to="/manage_bookings">Manage Bookings</Link>
-        </li>
-        <li>
-          <Link to="/manage_games">Manage Boardgames</Link>
-        </li>
-        <li>
-          <Link to="/manage_tables">Manage Tables</Link>
-        </li>
-        <li>
-          <button onClick={handleLogout}>Logout</button>
-        </li>
-      </ul>
-    </nav>
+    <Navbar expand="lg" className="bg-body-secondary p-3 mb-5">
+    <Container>
+      <Navbar.Brand href="/home"><img src="./tablequest.png" style={{height:60 , paddingRight:30}}></img> Admin Dashboard</Navbar.Brand>
+      <Navbar.Toggle aria-controls="basic-navbar-nav" />
+      <Navbar.Collapse id="basic-navbar-nav">
+        <Nav className="me-auto">
+          <Nav.Link href="/manage_bookings">Manage Bookings</Nav.Link>
+          <Nav.Link href="/manage_games">Manage Boardgames</Nav.Link>
+          <Nav.Link href="/manage_tables">Manage Tables</Nav.Link>
+          <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+        </Nav>
+      </Navbar.Collapse>
+    </Container>
+    </Navbar>
   );
 }
 

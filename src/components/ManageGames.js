@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AdminNavbar from './AdminNavbar'
+import Container from 'react-bootstrap/esm/Container';
+import Form from 'react-bootstrap/Form'
+import Button from 'react-bootstrap/esm/Button';
+import Card from 'react-bootstrap/Card'
+import Row from 'react-bootstrap/esm/Row'; 
+import Col from 'react-bootstrap/esm/Col';
 
 
 const API_BOARDGAMES_URL = "http://localhost:4000/boardgames";
@@ -81,47 +87,57 @@ function ManageGames() {
   };
 
   return (
-    <div>
+    <>
       <AdminNavbar/>
-      <h1>Manage Boardgames</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Title:</label>
-          <input
-            type="text"
-            value={title}
-            onChange={handleTitleChange}
-          />
-        </div>
-        <div>
-          <label>Description:</label>
-          <textarea
-            value={description}
-            onChange={handleDescriptionChange}
-          />
-        </div>
-        <div>
-          <label>Max Players:</label>
-          <input
-            type="number"
-            value={maxPlayers}
-            onChange={handleMaxPlayersChange}
-          />
-        </div>
-        <button type="submit">Create Boardgame</button>
-      </form>
-      <div>
-        <h2>Existing Boardgames</h2>
+      <Container>
+      <h3>Insert a new Boardgame</h3>
+      <Row className='mb-5'>
+        <Col lg={8} xl={6}>
+          <Form onSubmit={handleSubmit}>
+          <Form.Label>Title:</Form.Label>
+            <Form.Control
+              type="text"
+              value={title}
+              onChange={handleTitleChange}
+            />
+
+            <Form.Label>Description:</Form.Label>
+            <Form.Control as="textarea" rows={3}
+              value={description}
+              onChange={handleDescriptionChange}
+            />
+            <Form.Label>Max Players:</Form.Label>
+            <Form.Control
+              type="number"
+              value={maxPlayers}
+              onChange={handleMaxPlayersChange}
+            />
+          <Button size="lg" type="submit" className='mt-4'>Create Boardgame</Button>
+          </Form>
+        </Col>
+      </Row>
+      
+      <div className='mb-4'><h3>Manage Existing Boardgames</h3></div>
+        
+      <Row>
         {boardgames.map((boardgame) => (
-          <div key={boardgame.id}>
-            <p>Title: {boardgame.title}</p>
-            <p>Description: {boardgame.description}</p>
-            <p>Max Players: {boardgame.maxPlayers}</p>
-            <button onClick={() => handleDelete(boardgame.id)}>Delete</button>
-          </div>
+          <Col lg={6} className='mb-4'>
+            <Card key={boardgame.id}>
+            <Card.Body> 
+            <Card.Title>Title: {boardgame.title}</Card.Title>
+              <Card.Text>
+                Description: {boardgame.description}
+                <br/>
+                Max Players: {boardgame.maxPlayers}
+              </Card.Text>
+              <Button variant='danger' size='sm' onClick={() => handleDelete(boardgame.id)}>Delete</Button>
+            </Card.Body>
+            </Card>
+          </Col>
         ))}
-      </div>
-    </div>
+      </Row>
+      </Container>
+    </>
   );
 }
 

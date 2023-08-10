@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AdminNavbar from './AdminNavbar';
+import Container from 'react-bootstrap/esm/Container';
+import Button from 'react-bootstrap/esm/Button';
+import Form from 'react-bootstrap/Form';
+import Row from 'react-bootstrap/esm/Row';
+import Col from 'react-bootstrap/esm/Col';
+import Card from 'react-bootstrap/Card';
 
 const API_TABLES_URL = "http://localhost:4000/tables";
 
@@ -73,39 +79,46 @@ function ManageTables() {
   };
 
   return (
-    <div>
+    <>
       <AdminNavbar/>
-      <h1>Manage Tables</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Max Guests:</label>
-          <input
-            type="number"
-            value={maxGuests}
-            onChange={handleMaxGuestsChange}
-          />
-        </div>
-        <div>
-          <label>Table Number:</label>
-          <input
-            type="number"
-            value={tableNumber}
-            onChange={handleTableNumberChange}
-          />
-        </div>
-        <button type="submit">Create Table</button>
-      </form>
-      <div>
-        <h2>Existing Tables</h2>
+      <Container>
+      <h3>Insert a new Table</h3>
+      <Row className='mb-5'>
+        <Col lg={8} xl={6}>
+          <Form onSubmit={handleSubmit}>
+              <Form.Label>Max Guests:</Form.Label>
+              <Form.Control
+                type="number"
+                value={maxGuests}
+                onChange={handleMaxGuestsChange}
+              />
+              <Form.Label>Table Number:</Form.Label>
+              <Form.Control
+                type="number"
+                value={tableNumber}
+                onChange={handleTableNumberChange}
+              />
+            <Button size='lg' className='mt-4' type="submit">Create Table</Button>
+          </Form>
+        </Col>
+      </Row>
+      <div className='mb-4'><h3>Manage Existing Tables</h3> </div>
+      <Row>
         {tables.map((table) => (
-          <div key={table.id}>
-            <p>Table Number: {table.tableNumber}</p>
-            <p>Max Guests: {table.maxGuests}</p>
-            <button onClick={() => handleDelete(table.id)}>Delete</button>
-          </div>
+          <Col md={6} lg={4} xl={3} className='mb-4'>
+            <Card key={table.id}>
+              <Card.Body>
+                <Card.Title>Table Number: {table.tableNumber}</Card.Title>
+                <Card.Text>Max Guests: {table.maxGuests}</Card.Text>
+                <Button variant="danger" size="sm" onClick={() => handleDelete(table.id)}>Delete</Button>
+              </Card.Body>
+            </Card>
+          </Col>
         ))}
-      </div>
-    </div>
+      </Row>
+
+      </Container>
+    </>
   );
 }
 
